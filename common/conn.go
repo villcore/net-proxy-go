@@ -4,6 +4,7 @@ import (
 	"container/list"
 	"net"
 	"sync"
+	"fmt"
 )
 
 type Connection struct {
@@ -61,9 +62,12 @@ func TransferPackageToBytes(inConn net.Conn, outConn net.Conn, handlers []Packag
 			running = false
 		}
 
+		fmt.Println("pkg to bytes body len = ", len(pkg.GetBody()))
+
 		for _, handler := range handlers {
 			pkg = handler.Handle(&pkg)
 		}
+		fmt.Println("to bytes pkg = ", string(pkg.GetBody()))
 		//write一定是全部写入
 		_, error := outConn.Write(pkg.body)
 		if error != nil {

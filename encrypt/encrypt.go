@@ -52,17 +52,22 @@ func generateKeyUsePassword(password string, keyLen int) (key []byte) {
 
 // Initializes the block cipher with CFB mode, returns IV.
 func (c *Cipher) InitEncrypt() (iv []byte, err error) {
-	if c.iv == nil || len(iv) == 0 {
+	if c.iv == nil || len(c.iv) == 0 {
 		c.iv = make([]byte, IV_LEN)
 		if _, err := io.ReadFull(rand.Reader, c.iv); err != nil {
 			return nil, err
 		}
+		fmt.Println("generate iv ......")
+		//copy(c.iv[:], []byte("test.........0000000000000......")[0:16])
 		iv = c.iv
 	} else {
 		iv = c.iv
 	}
+
 	block, err := aes.NewCipher(c.key)
 	c.enc, err = cipher.NewCFBEncrypter(block, iv), nil
+
+	fmt.Println("init encrypt iv = ", iv, "key = ", c.key)
 	return iv, nil
 }
 

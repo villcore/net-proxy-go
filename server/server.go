@@ -27,6 +27,9 @@ func init() {
 	log.SetOutput(os.Stdout)
 }
 
+var(
+	dncryptHandler2 *common.DecryptHandler
+)
 //1.接受本地连接
 //2.解析包, 解析协议, 解析目的地址
 //3.构建远程连接
@@ -51,8 +54,6 @@ func AcceptConn(localConn net.Conn, password string) {
 			}
 		}
 	}()
-
-
 
 	bytesToPackageHandlers, packageToBytesHandlers := initHandlers(password)
 
@@ -147,13 +148,15 @@ func AcceptConn(localConn net.Conn, password string) {
 
 	if !hasError {
 		if (protocal == HTTPS) {
-			httpsConnectResp := "HTTP/1.0 200 Connection Established\r\n\r\n";
+			httpsConnectResp := "HTTP/1.0 200 Connection Established\r\n\r\n"
 			httpsRespPkg := *common.NewPackage()
 			httpsRespPkg.ValueOf(make([]byte, 0), []byte(httpsConnectResp))
+
 
 			for _, handler := range bytesToPackageHandlers {
 				httpsRespPkg = handler.Handle(&httpsRespPkg)
 			}
+			fmt.Println("https resp ori     = ", len(httpsRespPkg.GetBody()))
 
 			localConn.Write(httpsRespPkg.ToBytes())
 		}
@@ -202,6 +205,7 @@ func initHandlers(password string) ([]common.PackageHandler, []common.PackageHan
 		encryptHandler.SetIv(decryptHandler.GetIv())
 		encryptHandler.Init()
 	})
+	dncryptHandler2 = decryptHandler
 	//init handlers end ...
 	return bytesToPackageHandlers, packageToBytesHandlers
 }
