@@ -31,6 +31,7 @@ func (encryptHandler *EncryptHandler) SetIv(iv []byte) {
 
 func (encryptHandler *EncryptHandler) Init() {
 	encryptHandler.init = true
+	encryptHandler.encrypt.SetIv(encryptHandler.iv)
 	encryptHandler.encrypt.InitEncrypt()
 }
 
@@ -41,8 +42,6 @@ func (encryptHandler *EncryptHandler) Handle(pkg *Package) (newPkg Package) {
 	var nPkg Package
 	var encryptHeader []byte
 	encryptBody := make([]byte, len(body))
-	fmt.Println("encrypt init = ", encryptHandler.init)
-
 
 	if !encryptHandler.init {
 		//init
@@ -122,8 +121,6 @@ func (decryptHandler *DecryptHandler) Handle(pkg *Package) (newPkg Package) {
 	var decryptHeader []byte
 	decryptBody := make([]byte, len(body))
 
-	fmt.Println("decrypt init = ", decryptHandler.init)
-
 	if !decryptHandler.init {
 		lvLen := BytesToInt(header[:4])
 		iv := header[4:4+lvLen]
@@ -131,7 +128,6 @@ func (decryptHandler *DecryptHandler) Handle(pkg *Package) (newPkg Package) {
 		tmp := make([]byte, len(iv))
 		copy(tmp[:], iv[:])
 
-		fmt.Println("---decrypt iv = ", iv)
 		decryptHandler.iv = tmp
 		decryptHandler.decrypt.InitDecrypt(tmp)
 

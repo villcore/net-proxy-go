@@ -156,7 +156,6 @@ func AcceptConn(localConn net.Conn, password string) {
 			for _, handler := range bytesToPackageHandlers {
 				httpsRespPkg = handler.Handle(&httpsRespPkg)
 			}
-			fmt.Println("https resp ori     = ", len(httpsRespPkg.GetBody()))
 
 			localConn.Write(httpsRespPkg.ToBytes())
 		}
