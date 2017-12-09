@@ -54,7 +54,7 @@ func generateKeyUsePassword(password string, keyLen int) (key []byte) {
 func (c *Cipher) InitEncrypt() (iv []byte, err error) {
 	if c.iv == nil || len(iv) == 0 {
 		c.iv = make([]byte, IV_LEN)
-		if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+		if _, err := io.ReadFull(rand.Reader, c.iv); err != nil {
 			return nil, err
 		}
 		iv = c.iv

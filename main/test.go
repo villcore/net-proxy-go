@@ -4,6 +4,9 @@ import (
 	"../encrypt"
 	"fmt"
 	"../conf"
+	"os"
+	"io"
+	"crypto/rand"
 )
 
 func sliceModify(slice *[]int) {
@@ -16,7 +19,9 @@ func main() {
 	sliceModify(&slice)
 	fmt.Println(slice)
 
-	testStr := "CONNECT www.baidu.com:443 HTTP/1.1\r\nHost: www.baidu.com:443\r\nUser-Agent: curl/7.53.1\r\nProxy-Connection: Keep-Alive\r\n\r\n"
+	//testStr := "CONNECT www.baidu.com:443 HTTP/1.1\r\nHost: www.baidu.com:443\r\nUser-Agent: curl/7.53.1\r\nProxy-Connection: Keep-Alive\r\n\r\n"
+
+	testStr := "hello this is a test str ..."
 
 	cipher, err := encrypt.NewCipher("villcore")
 	iv, err := cipher.InitEncrypt()
@@ -39,8 +44,28 @@ func main() {
 
 	fmt.Println(string(dBytes))
 
+	file, err := os.Create("d://encrypt.dat")
+	defer file.Close()
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	file2, err2 := os.Create("d://iv.dat")
+	defer file2.Close()
+
+	if err2 != nil {
+		fmt.Println(err2)
+		return
+	}
+
+	file.Write(eBytes)
+	file2.Write(iv)
+	file.Sync()
+
 	//json
-	clientConfig, _:= conf.ReadClientConf("client.conf")
+	clientConfig, _ := conf.ReadClientConf("client.conf")
 	fmt.Println(clientConfig)
 
 	serverConfig, _ := conf.ReadServerConf("server.conf")
@@ -52,19 +77,26 @@ func main() {
 	i := 0
 	defer fmt.Println(i)
 	i++
+
+	fmt.Println("new iv ...")
+	newIv := make([]byte, 16)
+	if _, err := io.ReadFull(rand.Reader, newIv); err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(newIv)
 }
 
 func testDefer(num int) (int) {
 	defer func() {
 		fmt.Println("end...")
 	}()
-	if num % 2 == 0 {
+	if num%2 == 0 {
 		return 0
 	}
 
 	fmt.Println(num)
 	return 1
-
 
 	return 1
 }
