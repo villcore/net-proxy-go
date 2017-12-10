@@ -31,7 +31,7 @@ func (pkg *Package) ReadWithHeader(reader net.Conn) (err error) {
 	sizeBuf := make([]byte, 4+4+4)
 	n, err := io.ReadAtLeast(reader, sizeBuf, 12)
 
-	if n < 0 || err != nil {
+	if n < 0 || n > 1 * 1024 * 1024 || err != nil {
 		return errors.New("read error...")
 	}
 

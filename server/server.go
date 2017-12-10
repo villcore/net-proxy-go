@@ -84,7 +84,7 @@ func AcceptConn(localConn net.Conn, password string) {
 		//detect protocal
 		body := pkg.GetBody()
 		buf = body
-		//log.Printf("server recv first pkg = %v", string(body))
+		log.Printf("server recv first pkg = %v", string(body))
 		protocal = parseProtocal(body, len(body))
 
 		switch protocal {

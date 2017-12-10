@@ -19,9 +19,9 @@ func main() {
 	sliceModify(&slice)
 	fmt.Println(slice)
 
-	//testStr := "CONNECT www.baidu.com:443 HTTP/1.1\r\nHost: www.baidu.com:443\r\nUser-Agent: curl/7.53.1\r\nProxy-Connection: Keep-Alive\r\n\r\n"
+	testStr := "CONNECT www.baidu.com:443 HTTP/1.1\r\nHost: www.baidu.com:443\r\nUser-Agent: curl/7.53.1\r\nProxy-Connection: Keep-Alive\r\n\r\n"
 
-	testStr := "HTTP/1.0 200 Connection Established\r\n\r\n"
+	//testStr := "HTTP/1.0 200 Connection Established\r\n\r\n"
 
 	cipher, err := encrypt.NewCipher("villcore")
 	iv, err := cipher.InitEncrypt()

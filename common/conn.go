@@ -32,11 +32,14 @@ func TransferBytesToPackage(inConn net.Conn, outConn net.Conn, handlers []Packag
 		pkg := *NewPackage()
 		pkg.ValueOf(header, body)
 
+		//fmt.Println("bytes to pkg = ", string(body))
 		for _, handler := range handlers {
 			pkg = handler.Handle(&pkg)
 		}
+
 		//write一定是全部写入
 		_, error := outConn.Write(pkg.ToBytes())
+
 		if error != nil {
 			//log.Printf("write bytes to conn %v failed...\n", outConn.RemoteAddr())
 			running = false
@@ -84,6 +87,7 @@ func CloseConn(conns []net.Conn) {
 		}
 	}
 }
+
 func GetRemoteConn(addr string, port string) (net.Conn, error) {
 	return NewRemoteConn(addr, port)
 }
