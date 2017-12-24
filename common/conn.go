@@ -15,7 +15,7 @@ type Connection struct {
 
 func TransferBytesToPackage(inConn net.Conn, outConn net.Conn, handlers []PackageHandler, wg *sync.WaitGroup) {
 	running := true
-	buf := make([]byte, 1024*100) //100kb
+	buf := make([]byte, 1024*1024*1) //1mb
 
 	for running {
 		read, err := inConn.Read(buf)
