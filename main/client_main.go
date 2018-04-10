@@ -9,6 +9,8 @@ import (
 	"../client"
 	"../conf"
 	"log"
+	"os/exec"
+	"os/signal"
 )
 
 func main() {
@@ -17,6 +19,10 @@ func main() {
 		fmt.Println("can not load conf file ...")
 		return
 	}
+
+	//set windows proxy
+	cmd := exec.Command("win_utils\\sysproxy.exe", "global", "127.0.0.1:50081")
+	cmd.Start()
 
 	listenPort := clientConf.LocalPort
 	remoteAddr := clientConf.RemoteAddr
@@ -49,4 +55,12 @@ func main() {
 
 		go client.AcceptConn(conn, remoteAddr, remotePort, password)
 	}
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, os.Kill)
+
+	s := <-c
+	fmt.Println("Got signal:", s)
+	clearProxy := exec.Command("win_utils\\sysproxy.exe", "set", "1")
+	clearProxy.Start()
 }
