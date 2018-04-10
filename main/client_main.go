@@ -46,6 +46,17 @@ func main() {
 	addr := listener.Addr()
 	log.Printf("staring listen address : [%v] ...\n", addr.String())
 
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt)
+	go func() {
+		for _ = range signalChan {
+			fmt.Println("\n收到终端信号，停止服务... \n")
+			clearProxy := exec.Command("win_utils\\sysproxy.exe", "set", "1")
+			clearProxy.Start()
+			os.Exit(1)
+		}
+	}()
+
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
@@ -55,12 +66,4 @@ func main() {
 
 		go client.AcceptConn(conn, remoteAddr, remotePort, password)
 	}
-
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, os.Kill)
-
-	s := <-c
-	fmt.Println("Got signal:", s)
-	clearProxy := exec.Command("win_utils\\sysproxy.exe", "set", "1")
-	clearProxy.Start()
 }
