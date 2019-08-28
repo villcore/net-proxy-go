@@ -31,25 +31,24 @@ func (pkg *Package) ReadWithHeader(reader net.Conn) (err error) {
 	sizeBuf := make([]byte, 4+4+4)
 	n, err := io.ReadAtLeast(reader, sizeBuf, 12)
 
-	if n < 0 || n > 1 * 1024 * 1024 || err != nil {
+	if n < 0 || n > 1*1024*1024 || err != nil {
 		return errors.New("read error...")
 	}
 
 	headerLen := BytesToInt(sizeBuf[4:8])
 	bodyLen := BytesToInt(sizeBuf[8:12])
 
-	total := make([]byte, headerLen + bodyLen)
-	n2, err := io.ReadAtLeast(reader, total, headerLen + bodyLen)
+	total := make([]byte, headerLen+bodyLen)
+	n2, err := io.ReadAtLeast(reader, total, headerLen+bodyLen)
 
 	header := total[0:headerLen]
-	body := total[headerLen:headerLen+bodyLen]
+	body := total[headerLen : headerLen+bodyLen]
 
 	copy(pkg.len[:], sizeBuf[:4])
 	copy(pkg.headerLen[:], sizeBuf[4:8])
 	copy(pkg.bodyLen[:], sizeBuf[8:12])
 	pkg.header = header
 	pkg.body = body
-
 
 	if n2 < 0 || err != nil {
 		return errors.New("read error...")
@@ -59,7 +58,7 @@ func (pkg *Package) ReadWithHeader(reader net.Conn) (err error) {
 
 //readWithoutHeader
 func (pkg *Package) ReadWithoutHeader(reader io.Reader) (err error) {
-	buf := make([]byte, 0, 100 * 1024)
+	buf := make([]byte, 0, 100*1024)
 	n, err := reader.Read(buf)
 
 	pkg.body = buf
@@ -108,5 +107,3 @@ func (pkg *Package) ToBytes() []byte {
 
 	return totalBytes
 }
-
-

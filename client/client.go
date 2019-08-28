@@ -2,8 +2,8 @@ package client
 
 import (
 	"net"
-	"sync"
 	"os"
+	"sync"
 
 	//"github.com/villcore/net-proxy-go/common"
 	"../common"
@@ -23,8 +23,8 @@ func init() {
 //TODO defer panic recover 处理
 func AcceptConn(localConn net.Conn, remoteAddr string, remotePort string, password string) {
 
-	var bytesToPackageHandlers []common.PackageHandler = make([]common.PackageHandler, 0)
-	var packageToBytesHandlers []common.PackageHandler = make([]common.PackageHandler, 0)
+	var bytesToPackageHandlers = make([]common.PackageHandler, 0)
+	var packageToBytesHandlers = make([]common.PackageHandler, 0)
 	//
 	cipher, err := encrypt.NewCipher(password)
 	if err != nil {
