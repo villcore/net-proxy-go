@@ -9,8 +9,6 @@ import (
 	"../client"
 	"../conf"
 	"log"
-	"os/exec"
-	"os/signal"
 )
 
 func main() {
@@ -19,10 +17,6 @@ func main() {
 		fmt.Println("can not load conf file ...")
 		return
 	}
-
-	//set windows proxy
-	cmd := exec.Command("win_utils\\sysproxy.exe", "global", "127.0.0.1:50081")
-	cmd.Start()
 
 	listenPort := clientConf.LocalPort
 	remoteAddr := clientConf.RemoteAddr
@@ -45,17 +39,6 @@ func main() {
 
 	addr := listener.Addr()
 	log.Printf("staring listen address : [%v] ...\n", addr.String())
-
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, os.Interrupt)
-	go func() {
-		for _ = range signalChan {
-			fmt.Println("\n收到终端信号，停止服务... \n")
-			clearProxy := exec.Command("win_utils\\sysproxy.exe", "set", "1")
-			clearProxy.Start()
-			os.Exit(1)
-		}
-	}()
 
 	for {
 		conn, err := listener.Accept()
