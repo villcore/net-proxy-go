@@ -130,7 +130,6 @@ func proxyRemoteConn(localConn net.Conn, remoteAddr string, remotePort string, p
 	var wg sync.WaitGroup
 	wg.Add(2)
 	remoteConn, error := GetRemoteConn(remoteAddr, remotePort)
-
 	if error != nil {
 		if localConn != nil {
 			localConn.Close()

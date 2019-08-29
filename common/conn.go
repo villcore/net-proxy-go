@@ -2,6 +2,8 @@ package common
 
 import (
 	"container/list"
+	"fmt"
+	"log"
 	"net"
 	"sync"
 )
@@ -16,13 +18,14 @@ type Connection struct {
 func TransferBytesToPackage(inConn net.Conn, outConn net.Conn, handlers []PackageHandler, wg *sync.WaitGroup) {
 	running := true
 	buf := make([]byte, 1024*1024*1) //1mb
-
 	for running {
 		read, err := inConn.Read(buf)
 		if err != nil {
-			//log.Printf("read bytes form conn %v failed...\n", inConn.RemoteAddr())
+			log.Printf("read bytes form conn %v failed...\n", inConn.RemoteAddr())
 			running = false
 		}
+
+		log.Println("b")
 
 		header := make([]byte, 0)
 		body := make([]byte, read)
@@ -32,7 +35,7 @@ func TransferBytesToPackage(inConn net.Conn, outConn net.Conn, handlers []Packag
 		pkg := *NewPackage()
 		pkg.ValueOf(header, body)
 
-		//fmt.Println("bytes to pkg = ", string(body))
+		fmt.Println("bytes to pkg = ", string(body))
 		for _, handler := range handlers {
 			pkg = handler.Handle(&pkg)
 		}
