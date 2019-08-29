@@ -62,7 +62,7 @@ func parseHttpsAddress(firstReq []byte) (addr string, port int, err error) {
 	req, err := http.ReadRequest(bufio.NewReader(strings.NewReader(string(firstReq))))
 
 	if err != nil {
-		return "", -1, errors.New("unrecognized proctol...")
+		return "", -1, errors.New("unreconized proctocol")
 	}
 
 	addrAndPort := req.Host
@@ -74,8 +74,6 @@ func parseHttpsAddress(firstReq []byte) (addr string, port int, err error) {
 	if len(infos) > 1 {
 		port, err = strconv.Atoi(infos[1])
 	}
-
-	fmt.Printf("addr = %v, port = %v\n", addr, port)
 	return addr, port, nil
 }
 

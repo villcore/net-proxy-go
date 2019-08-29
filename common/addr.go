@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"sync"
+	"time"
 )
 
 func init() {
@@ -50,9 +51,9 @@ func (addr *Address) IsAccessible(address string, port int) bool {
 }
 
 func connect(address string) bool {
-	conn, err := net.Dial("tcp", address) //创建套接字,连接服务器,设置超时时间
+	conn, err := net.DialTimeout("tcp", address, 1*time.Second)
 	if err != nil {
-		log.Printf("connect %v failed. \n", address)
+		log.Printf("connect %v failed. %v \n", address, err)
 		return false
 	}
 	defer func() {
