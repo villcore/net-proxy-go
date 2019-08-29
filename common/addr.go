@@ -1,11 +1,16 @@
 package common
 
 import (
-	"fmt"
+	"log"
 	"net"
-	"strings"
+	"os"
+	"strconv"
 	"sync"
 )
+
+func init() {
+	log.SetOutput(os.Stdout)
+}
 
 type Address struct {
 	M          sync.Mutex
@@ -25,9 +30,7 @@ func (addr *Address) setAccessible(address string, accessible bool) {
 func (addr *Address) getAccessible(address string) (bool, bool2 bool) {
 	addr.M.Lock()
 	defer addr.M.Unlock()
-
-	host, _ := addr.hostAndPort(address)
-	accessible, ok := addr.Accessible[host]
+	accessible, ok := addr.Accessible[address]
 	return accessible, ok
 }
 
@@ -37,33 +40,24 @@ func (addr *Address) clear() {
 	addr.Accessible = make(map[string]bool)
 }
 
-func (addr *Address) IsAccessible(address string) bool {
-	host, port := addr.hostAndPort(address)
+func (addr *Address) IsAccessible(address string, port int) bool {
 	accessible, ok := addr.getAccessible(address)
 	if !ok {
-		accessible = connect(host + ":" + port)
-		addr.setAccessible(host, accessible)
+		accessible = connect(address + ":" + strconv.Itoa(port))
+		addr.setAccessible(address, accessible)
 	}
 	return accessible
-}
-
-func (addr *Address) hostAndPort(address string) (string, string) {
-	hostAndPort := strings.Split(address, ":")
-	if len(hostAndPort) == 1 {
-		return hostAndPort[0], string(80)
-	}
-	var host, port string
-	host = hostAndPort[0]
-	port = hostAndPort[1]
-	return host, port
 }
 
 func connect(address string) bool {
 	conn, err := net.Dial("tcp", address) //创建套接字,连接服务器,设置超时时间
 	if err != nil {
-		fmt.Println("x {}", err)
+		log.Printf("connect %v failed. \n", address)
 		return false
 	}
-	defer conn.Close()
+	defer func() {
+		_ = conn.Close()
+	}()
+	log.Printf("connect %v succeed. \n", address)
 	return true
 }

@@ -1,15 +1,15 @@
 package common
 
 import (
-	"bufio"
-	"bytes"
+	"log"
 	"net"
-	"net/http"
+	"os"
 	"strconv"
 	"sync"
 )
 
 func init() {
+	log.SetOutput(os.Stdout)
 }
 
 var (
@@ -18,54 +18,50 @@ var (
 
 func AcceptConn(conn net.Conn) {
 	b := make([]byte, 4096)
-	n, error := conn.Read(b)
-	if error != nil {
-	_:
-		conn.Close()
+	var n, e = conn.Read(b)
+	if e != nil {
+		_ = conn.Close()
 		return
 	}
 
-	requestReader := bufio.NewReader(bytes.NewReader(b[0:n]))
-	request, error := http.ReadRequest(requestReader)
-	address := request.Host
-	_, port := Dns.hostAndPort(address)
-	print(address)
+	addr, port, e := ParseHttpOrHttps(b, n)
+	if e != nil {
+		_ = conn.Close()
+	}
 
 	shutdownGroup := sync.WaitGroup{}
 	shutdownGroup.Add(1)
+
 	var fromConn = conn
 	var toConn net.Conn
 	var err interface{}
 
-	if Dns.IsAccessible(address) {
-		toConn, err = net.Dial("tcp", address)
+	if Dns.IsAccessible(addr, port) {
+		toConn, err = net.Dial("tcp", addr+":"+strconv.Itoa(port))
 		if err != nil {
 			shutdownGroup.Done()
 			return
 		}
 
-		print("+accessible")
-		if portNumber, _ := strconv.Atoi(port); portNumber == 443 {
-			_, error := conn.Write([]byte("HTTP/1.0 200 Connection Established\r\n\r\n"))
-			if error != nil {
-				conn.Close()
+		log.Printf("conn to %v:%v is accessible. \n", addr, port)
+		if port == HTTPS {
+			_, e := conn.Write([]byte("HTTP/1.0 200 Connection Established\r\n\r\n"))
+			if e != nil {
+				_ = conn.Close()
 			}
 		} else {
 			if _, err := toConn.Write(b[0:n]); err != nil {
 				shutdownGroup.Done()
-				conn.Close()
+				_ = conn.Close()
 			}
 		}
 
 		go forward(fromConn, toConn, shutdownGroup)
 	} else {
-		print("-accessible")
+		log.Printf("conn to %v:%v is unccessible. \n", addr, port)
 		// remote proxy
 	}
 
-	// read request address
-	// check direct or proxy
-	// go proxy or direct
 	shutdownGroup.Wait()
 	defer func() {
 		closeConn(fromConn)
@@ -76,7 +72,7 @@ func AcceptConn(conn net.Conn) {
 
 func closeConn(conn net.Conn) {
 	if conn != nil {
-		conn.Close()
+		_ = conn.Close()
 	}
 }
 
