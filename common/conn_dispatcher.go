@@ -37,7 +37,7 @@ func AcceptConn(conn net.Conn) {
 	defer func() {
 		closeConn(fromConn)
 		closeConn(toConn)
-		log.Printf("conn local [%v] to [%v] is closed. \n", fromConn.LocalAddr(), toConn.RemoteAddr())
+		// log.Printf("conn local [%v] to [%v] is closed. \n", fromConn.LocalAddr(), toConn.RemoteAddr())
 	}()
 
 	shutdownGroup := sync.WaitGroup{}
@@ -74,7 +74,7 @@ func AcceptConn(conn net.Conn) {
 		remoteAddr := "207.246.108.224"
 		remotePort := "20081"
 		password := "villcore2"
-		proxyRemoteConn(fromConn, remoteAddr, remotePort, password)
+		proxyRemoteConn(fromConn, b, n, remoteAddr, remotePort, password)
 		shutdownGroup.Add(-2)
 	}
 	shutdownGroup.Wait()
@@ -106,7 +106,7 @@ func forward(fromConn, toConn net.Conn, shutdownGroup sync.WaitGroup) {
 	}
 }
 
-func proxyRemoteConn(localConn net.Conn, remoteAddr string, remotePort string, password string) {
+func proxyRemoteConn(localConn net.Conn, req []byte, len int, remoteAddr string, remotePort string, password string) {
 	var bytesToPackageHandlers = make([]PackageHandler, 0)
 	var packageToBytesHandlers = make([]PackageHandler, 0)
 	//
@@ -142,7 +142,7 @@ func proxyRemoteConn(localConn net.Conn, remoteAddr string, remotePort string, p
 		wg.Done()
 	} else {
 		//transfer
-		go TransferBytesToPackage(localConn, remoteConn, bytesToPackageHandlers, &wg)
+		go TransferBytes(localConn, remoteConn, req, len, bytesToPackageHandlers, &wg)
 
 		//transfer
 		go TransferPackageToBytes(remoteConn, localConn, packageToBytesHandlers, &wg)
