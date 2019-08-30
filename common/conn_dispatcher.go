@@ -15,6 +15,8 @@ func init() {
 	log.SetOutput(os.Stdout)
 }
 
+const HttpsConnectResp = "HTTP/1.0 200 Connection Established\r\n\r\n"
+
 var (
 	Addr = NewAddress()
 )
@@ -30,20 +32,21 @@ func AcceptConn(conn net.Conn) {
 	addr, port, e := ParseHttpOrHttps(b, n)
 	if e != nil {
 		_ = conn.Close()
+		return
 	}
 
 	var fromConn = conn
 	var toConn net.Conn
 	defer func() {
+		// log.Printf("conn local [%v] to [%v] is closed. \n", fromConn.LocalAddr(), toConn.RemoteAddr())
 		closeConn(fromConn)
 		closeConn(toConn)
-		// log.Printf("conn local [%v] to [%v] is closed. \n", fromConn.LocalAddr(), toConn.RemoteAddr())
 	}()
 
 	shutdownGroup := sync.WaitGroup{}
 	shutdownGroup.Add(2)
-	var err interface{}
 
+	var err interface{}
 	if Addr.IsAccessible(addr, port) {
 		log.Printf("conn to %v:%v is acessible ✅. \n", addr, port)
 
@@ -52,9 +55,9 @@ func AcceptConn(conn net.Conn) {
 			shutdownGroup.Add(-2)
 			return
 		}
+
 		if port == 443 {
-			connectResp := "HTTP/1.0 200 Connection Established\r\n\r\n"
-			_, e := fromConn.Write([]byte(connectResp))
+			_, e := fromConn.Write([]byte(HttpsConnectResp))
 			if e != nil {
 				_ = conn.Close()
 				shutdownGroup.Add(-2)
@@ -67,6 +70,7 @@ func AcceptConn(conn net.Conn) {
 				return
 			}
 		}
+
 		go forward(fromConn, toConn, shutdownGroup)
 		go forward(toConn, fromConn, shutdownGroup)
 	} else {
@@ -87,20 +91,20 @@ func closeConn(conn net.Conn) {
 }
 
 func forward(fromConn, toConn net.Conn, shutdownGroup sync.WaitGroup) {
-	b := make([]byte, 4096)
+	defer shutdownGroup.Done()
+
+	b := make([]byte, 10*1024)
 	var n int
 	var err error
 
 	for true {
 		if n, err = fromConn.Read(b); err != nil {
-			shutdownGroup.Done()
-			return
+			break
 		}
-		// log.Printf("read from %d bytes.\n %s \n", n, string(b[0:n]))
 		// log.Printf("🚀 ⬇️ %-5d bytes. \n", n)
+
 		if n, err = toConn.Write(b[0:n]); err != nil {
-			shutdownGroup.Done()
-			return
+			break
 		}
 		// log.Printf("🚀 ⬆️ %-5d bytes. \n", n)
 	}

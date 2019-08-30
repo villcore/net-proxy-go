@@ -210,8 +210,6 @@ func initHandlers(password string) ([]common.PackageHandler, []common.PackageHan
 }
 
 func parseProtocal(req []byte, len int) int {
-	//TODO SOCKS_5
-
 	//HTTPS
 	if len >= 7 {
 		headerInfo := string(req[:7])

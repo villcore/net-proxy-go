@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -22,7 +21,7 @@ func ParseHttpOrHttps(b []byte, len int) (string, int, error) {
 	case HTTPS:
 		return parseHttpsAddress(b)
 	}
-	return "", 0, nil
+	return "", 0, errors.New("unknown protocol")
 }
 
 func parseProtocol(req []byte, len int) int {
@@ -48,12 +47,13 @@ func parseProtocol(req []byte, len int) int {
 
 	if httpOpePos != -1 {
 		requestMethod := string(req[:httpOpePos])
-		log.Println("requestMethod = ", requestMethod)
 		// TODO: http 其他方法
 		if strings.EqualFold(requestMethod, "GET") || strings.EqualFold(requestMethod, "POST") {
 			return HTTP
 		}
 	}
+
+	// log.Printf("unknown protocol \n %v \n", string(req[0:len]))
 	return -1
 }
 

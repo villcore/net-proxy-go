@@ -51,7 +51,7 @@ func (addr *Address) IsAccessible(address string, port int) bool {
 }
 
 func connect(address string) bool {
-	conn, err := net.DialTimeout("tcp", address, 1*time.Second)
+	conn, err := net.DialTimeout("tcp", address, 3*time.Second)
 	if err != nil {
 		log.Printf("connect %v failed. %v \n", address, err)
 		return false
