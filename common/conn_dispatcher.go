@@ -21,7 +21,7 @@ var (
 	Addr = NewAddress()
 )
 
-func AcceptConn(conn net.Conn) {
+func AcceptConn(conn net.Conn, remoteAddr string, remotePort string, password string) {
 	b := make([]byte, 4096)
 	var n, e = conn.Read(b)
 	if e != nil {
@@ -70,9 +70,6 @@ func AcceptConn(conn net.Conn) {
 		go forward(toConn, fromConn, &shutdownGroup)
 	} else {
 		log.Printf("conn to %v:%v is unacessible ❌. \n", addr, port)
-		remoteAddr := "207.246.108.224"
-		remotePort := "20081"
-		password := "villcore2"
 		proxyRemoteConn(fromConn, b, n, remoteAddr, remotePort, password)
 		shutdownGroup.Add(-2)
 	}

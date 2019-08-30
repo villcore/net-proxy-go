@@ -18,9 +18,9 @@ func main() {
 	}
 
 	listenPort := clientConf.LocalPort
-	//remoteAddr := clientConf.RemoteAddr
-	//remotePort := clientConf.RemotePort
-	//password := clientConf.Password
+	remoteAddr := clientConf.RemoteAddr
+	remotePort := clientConf.RemotePort
+	password := clientConf.Password
 
 	fmt.Print("local client start...\n")
 	//
@@ -47,6 +47,6 @@ func main() {
 		// log.Printf("accept conn [%v] success ...\n", conn.RemoteAddr())
 
 		// go client.AcceptConn(conn, remoteAddr, remotePort, password)
-		go common.AcceptConn(conn)
+		go common.AcceptConn(conn, remoteAddr, remotePort, password)
 	}
 }
