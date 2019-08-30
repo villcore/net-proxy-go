@@ -44,7 +44,7 @@ func main() {
 		if err != nil {
 			log.Printf("accept conn [%v] failed ...\n", conn.LocalAddr())
 		}
-		log.Printf("accept conn [%v] success ...\n", conn.RemoteAddr())
+		// log.Printf("accept conn [%v] success ...\n", conn.RemoteAddr())
 
 		// go client.AcceptConn(conn, remoteAddr, remotePort, password)
 		go common.AcceptConn(conn)

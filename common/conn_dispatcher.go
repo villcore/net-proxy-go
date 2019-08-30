@@ -97,12 +97,12 @@ func forward(fromConn, toConn net.Conn, shutdownGroup sync.WaitGroup) {
 			return
 		}
 		// log.Printf("read from %d bytes.\n %s \n", n, string(b[0:n]))
-		log.Printf("🚀 ⬇️ %-5d bytes. \n", n)
+		// log.Printf("🚀 ⬇️ %-5d bytes. \n", n)
 		if n, err = toConn.Write(b[0:n]); err != nil {
 			shutdownGroup.Done()
 			return
 		}
-		log.Printf("🚀 ⬆️ %-5d bytes. \n", n)
+		// log.Printf("🚀 ⬆️ %-5d bytes. \n", n)
 	}
 }
 
