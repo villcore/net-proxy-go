@@ -37,11 +37,6 @@ func AcceptConn(conn net.Conn) {
 
 	var fromConn = conn
 	var toConn net.Conn
-	defer func() {
-		// log.Printf("conn local [%v] to [%v] is closed. \n", fromConn.LocalAddr(), toConn.RemoteAddr())
-		closeConn(fromConn)
-		closeConn(toConn)
-	}()
 
 	shutdownGroup := sync.WaitGroup{}
 	shutdownGroup.Add(2)
@@ -71,8 +66,8 @@ func AcceptConn(conn net.Conn) {
 			}
 		}
 
-		go forward(fromConn, toConn, shutdownGroup)
-		go forward(toConn, fromConn, shutdownGroup)
+		go forward(fromConn, toConn, &shutdownGroup)
+		go forward(toConn, fromConn, &shutdownGroup)
 	} else {
 		log.Printf("conn to %v:%v is unacessible ❌. \n", addr, port)
 		remoteAddr := "207.246.108.224"
@@ -81,7 +76,10 @@ func AcceptConn(conn net.Conn) {
 		proxyRemoteConn(fromConn, b, n, remoteAddr, remotePort, password)
 		shutdownGroup.Add(-2)
 	}
+
 	shutdownGroup.Wait()
+	closeConn(fromConn)
+	closeConn(toConn)
 }
 
 func closeConn(conn net.Conn) {
@@ -90,7 +88,7 @@ func closeConn(conn net.Conn) {
 	}
 }
 
-func forward(fromConn, toConn net.Conn, shutdownGroup sync.WaitGroup) {
+func forward(fromConn, toConn net.Conn, shutdownGroup *sync.WaitGroup) {
 	defer shutdownGroup.Done()
 
 	b := make([]byte, 10*1024)
